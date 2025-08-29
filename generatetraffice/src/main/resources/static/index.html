@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test Page</title>
+    <meta charset="UTF-8" />
+    <script>
+    async function Submit() {
+      const host = document.getElementById("host").value;
+      const port = document.getElementById("port").value;
+      const count = document.getElementById("count").value;
+      const method = document.getElementById("method").value;
+      const urls = document.getElementById("urlList").value.split(",");
+
+      const payload = {
+        host,
+        port,
+        method,
+        count,
+        urlList: urls.map(u => u.trim())
+      };
+
+      let response;
+
+      if (method === "POST") {
+        response = await fetch("/api/submitPostRequest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } else if (method === "GET") {
+        // convert payload to query params
+        const params = new URLSearchParams(payload).toString();
+        response = await fetch("/api/submitGetRequest?" + params, {
+          method: "GET"
+        });
+      }
+
+      const result = await response.text();
+      const items = result.split(",").map(s => s.trim());
+      document.getElementById("result").innerHTML = items.join("<br>");
+    }
+
+</script>
+</head>
+<body style="font-family: Arial; margin: 30px;">
+<h2>API Tester</h2>
+
+<label>Method:</label>
+<select id="method">
+    <option value="POST" selected>POST</option>
+    <option value="GET">GET</option>
+</select>
+<br><br>
+
+<label>Host:</label>
+<input type="text" id="host"><br>
+<span style="color: gray; font-size: 12px;">Example: localhost or 127.0.0.1</span><br>
+
+<label>Port:</label>
+<input type="text" id="port"><br>
+<span style="color: gray; font-size: 12px;">Example: 8080</span><br>
+
+<label>Multiple URLs:</label>
+<input type="text" id="urlList"><br>
+<span style="color: gray; font-size: 12px;">Example: /example.com/api1, /example.com/api2</span><br>
+
+<label>URL Run Count:</label>
+<input type="text" id="count">
+<button onclick="Submit()">Submit</button><br>
+
+<h3>Result:</h3>
+<pre id="result" style="background: #f4f4f4; padding: 10px; border: 1px solid #ccc;"></pre>
+</body>
+</html>
